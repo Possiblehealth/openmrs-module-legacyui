@@ -101,7 +101,14 @@ public class MergePatientsFormController extends SimpleFormController {
 			}
 			catch (APIException e) {
 				log.error("Unable to merge patients", e);
-				httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Patient.merge.fail");
+                String message = e.getMessage();
+                if(message == null || message == ""){
+					httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Patient.merge.fail");
+                }
+                else{
+					httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, message);
+				}
+
 				return showForm(request, response, errors);
 			}
 			
@@ -198,7 +205,7 @@ public class MergePatientsFormController extends SimpleFormController {
 		for (Patient pat : patientList) {
 			List<Order> orders = os.getAllOrdersByPatient(pat);
 			for (Order o : orders) {
-				if (!o.isVoided()) {
+				if (o.isActive()) {
 					patientIdsWithUnvoidedOrders.add(pat.getId());
 					break;
 				}
